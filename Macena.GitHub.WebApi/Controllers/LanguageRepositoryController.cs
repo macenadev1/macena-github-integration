@@ -23,9 +23,11 @@ namespace Macena.GitHub.WebApi.Controllers
         private readonly IRepository _repository;
 
         /// <summary>
-        /// Class default constructor.
+        /// Constructor Language Repository Controller
         /// </summary>
-        /// <param name="logger">Log service.</param>
+        /// <param name="logger">Instance ILogger</param>
+        /// <param name="appSettings">Instance IAppSettings</param>
+        /// <param name="repository">Instance repository</param>
         public LanguageRepositoryController(
             ILogger<LanguageRepositoryController> logger,
             IAppSettings appSettings,
