@@ -67,25 +67,25 @@ namespace Macena.GitHub.Core.Operation.FetchRepositoryStore
         {
             _logger.LogDebug("initializes interaction over languages.");
 
-            var tasks = request.Languages.Select(async language =>
+            List<GitHubRepositoryItem> listAll = new List<GitHubRepositoryItem>();
+
+            foreach (var item in request.Languages)
             {
-                _logger.LogDebug($"Processing with {language} language");
-                var result = await this.GetTopRepositoriesAsync(language);
+                _logger.LogDebug($"Processing with {item} language");
+                var result = await this.GetTopRepositoriesAsync(item);
 
-                foreach (var itemRepo in result)
+                listAll.AddRange(result);
+            }
+
+            foreach (var item in listAll)
+            {
+                var itemConvert = item.Map();
+
+                if (!await _repository.ExistsAsync(itemConvert.IdGitHub))
                 {
-                    var itemConvert = itemRepo.Map();
-
-                    bool existsRepo = await _repository.ExistsAsync(itemConvert.IdGitHub);
-
-                    if (!existsRepo)
-                    {
-                        await _repository.AddAsync(itemConvert);
-                    }
+                    await _repository.AddAsync(itemConvert);
                 }
-            });
-
-            await Task.WhenAll(tasks);
+            }
 
             return new FetchStoreRepositoriesResponse
             {
