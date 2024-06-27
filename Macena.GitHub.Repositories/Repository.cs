@@ -1,5 +1,3 @@
-using System.Data.SqlClient;
-using Dapper;
 using Macena.GitHub.DomainInterfaces;
 using Macena.GitHub.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Macena.GitHub.Repositories
 {
     /// <summary>
-    /// Repository class that handles data operations for GitHub repositories.
+    /// Repository class that handles data operations for GitHub repositories using Entity Framework Core.
     /// </summary>
     public class Repository : IRepository
     {
@@ -29,45 +27,27 @@ namespace Macena.GitHub.Repositories
         /// <returns>The ID of the added GitHub repository.</returns>
         public async Task<int> AddAsync(GitHubRepository gitHub)
         {
-            string query = @"INSERT INTO GitHubRepositories (IdGitHub, Name, FullName, HtmlUrl, Description, Fork, Url, CreatedAt, UpdatedAt, PushedAt, Homepage, Size, StargazersCount, WatchersCount, Language, ForksCount, OpenIssuesCount, DefaultBranch, Score)
-                     VALUES (@IdGitHub, @Name, @FullName, @HtmlUrl, @Description, @Fork, @Url, @CreatedAt, @UpdatedAt, @PushedAt, @Homepage, @Size, @StargazersCount, @WatchersCount, @Language, @ForksCount, @OpenIssuesCount, @DefaultBranch, @Score)";
-
-            using (var sqlConnection = new SqlConnection(_context.Database.GetConnectionString()))
-            {
-                await sqlConnection.OpenAsync();
-
-                using (var transaction = sqlConnection.BeginTransaction())
-                {
-                    await sqlConnection.ExecuteAsync(query, gitHub, transaction);
-
-                    transaction.Commit();
-                }
-            }
-
+            _context.GitHubRepositories.Add(gitHub);
+            await _context.SaveChangesAsync();
             return gitHub.IdGitHub;
         }
 
         /// <summary>
-        /// Verify if Exists a document
+        /// Verify if a GitHub repository exists by its ID.
         /// </summary>
         /// <param name="id">The ID of the GitHub repository.</param>
-        /// <returns>True if Exists</returns>
+        /// <returns>True if the repository exists.</returns>
         public async Task<bool> ExistsAsync(int id)
         {
-            using (var sqlConnection = new SqlConnection(_context.Database.GetConnectionString()))
-            {
-                await sqlConnection.OpenAsync();
-
-                var query = "SELECT COUNT(1) FROM GitHubRepositories WHERE IdGitHub = @Id";
-                var exists = await sqlConnection.ExecuteScalarAsync<bool>(query, new { Id = id });
-
-                return exists;
-            }
+            return await _context.GitHubRepositories.AnyAsync(r => r.IdGitHub == id);
         }
 
         /// <summary>
-        /// Retrieves all GitHub repositories from the database.
+        /// Retrieves all GitHub repositories from the database optionally filtered by language and paginated.
         /// </summary>
+        /// <param name="language">The programming language to filter by.</param>
+        /// <param name="page">The page number for pagination (1-based).</param>
+        /// <param name="pageSize">The number of items per page.</param>
         /// <returns>A list of GitHub repositories.</returns>
         public async Task<List<GitHubRepository>> GetAllAsync(string? language = null, int? page = null, int? pageSize = null)
         {
@@ -93,7 +73,7 @@ namespace Macena.GitHub.Repositories
         /// <returns>The GitHub repository entity.</returns>
         public async Task<GitHubRepository> GetByIdAsync(int id)
         {
-            return await _context.GitHubRepositories.SingleOrDefaultAsync(d => d.IdGitHub == id);
+            return await _context.GitHubRepositories.FirstOrDefaultAsync(r => r.IdGitHub == id);
         }
     }
 }

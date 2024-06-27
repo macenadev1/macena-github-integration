@@ -1,3 +1,4 @@
+using System.Reflection;
 using Macena.GitHub.Core.Settings;
 using Macena.GitHub.DomainInterfaces;
 using Macena.GitHub.Repositories;
@@ -9,7 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Adicionar serviços ao contêiner
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(opt =>
+{
+    opt.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Macena.GitHubApi", Version = "v1" });
+
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    opt.IncludeXmlComments(xmlPath);
+});
 
 // Carregar as configurações do appsettings.json e outras fontes
 builder.Configuration
@@ -38,10 +46,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => 
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-    });
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

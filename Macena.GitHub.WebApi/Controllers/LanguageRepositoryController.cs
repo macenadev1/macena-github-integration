@@ -39,8 +39,9 @@ namespace Macena.GitHub.WebApi.Controllers
         /// <summary>
         /// Handles the HTTP POST request for fetching and storing repositories.
         /// </summary>
-        /// <param name="request">The request containing information for fetching and storing repositories.</param>
-        /// <returns>An asynchronous task representing the IActionResult of the HTTP response.</returns>
+        /// <param name="request">If no programming languages are specified, the following default values will be used: "C#", "JavaScript", "Python", "C", "Java".</param>
+        /// <returns>The languages ​​registered successfully.</returns>
+        /// <response code="200">Returns the languages ​​registered successfully.</response>
         [HttpPost("fetch-and-store")]
         public async Task<IActionResult> FetchAndStoreRepositories([FromBody] FetchStoreRepositoriesRequest request)
         {
@@ -60,6 +61,7 @@ namespace Macena.GitHub.WebApi.Controllers
         /// </summary>
         /// <param name="filter">Optional filter parameters.</param>
         /// <returns>A list of GitHub repositories.</returns>
+        /// <response code="200">A list of GitHub repositories.</response>
         [HttpGet]
         public async Task<ActionResult> Get([FromQuery] GetAllRepositoriesRequest filter)
         {
@@ -75,6 +77,7 @@ namespace Macena.GitHub.WebApi.Controllers
         /// </summary>
         /// <param name="id">The unique identifier of the repository.</param>
         /// <returns>The details of the specified GitHub repository.</returns>
+        /// <response code="200">The details of the specified GitHub repository.</response>
         [HttpGet("{id}")]
         public async Task<ActionResult> GetRepositoryDetails(int id)
         {
