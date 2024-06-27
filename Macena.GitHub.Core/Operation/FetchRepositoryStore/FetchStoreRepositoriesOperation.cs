@@ -102,9 +102,7 @@ namespace Macena.GitHub.Core.Operation.FetchRepositoryStore
         {
             try
             {
-                _httpClient.DefaultRequestHeaders.Clear();
-                _httpClient.DefaultRequestHeaders.Add("User-Agent", NAME_APP);
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _appSettings.AccessTokenGitHub);
+                this.MapHeader();
 
                 var url = $"{_appSettings.BaseUrlLanguageGitHub}/search/repositories?q=language:{language}&sort=stars&order=desc";
                 _logger.LogDebug($"Url for request: {url}");
@@ -121,6 +119,20 @@ namespace Macena.GitHub.Core.Operation.FetchRepositoryStore
             catch (JsonException ex)
             {
                 throw new Exception("Error parsing JSON response.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Mapper Header
+        /// </summary>
+        private void MapHeader()
+        {
+            _httpClient.DefaultRequestHeaders.Clear();
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", NAME_APP);
+
+            if (!string.IsNullOrEmpty(_appSettings.AccessTokenGitHub))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _appSettings.AccessTokenGitHub);
             }
         }
 
